@@ -45,6 +45,15 @@ int main()
     RectangleShape bloque(Vector2f(80, 20));
     bloque.setPosition(100, 100);
     bloque.setFillColor(Color::Magenta);
+    //-------------------------------------------------------------------------
+    // cargar textura de la serpiente
+    Texture texturaCabeza, texturaCuerpo, texturaCola;
+    if (!texturaCabeza.loadFromFile("../recursos/cabezaDerecha.png") ||
+        !texturaCuerpo.loadFromFile("../recursos/cuerpoHorizontal.png") ||
+        !texturaCola.loadFromFile("../recursos/colaIzq.png"))
+    {
+        return -1; // Termina si no se pueden cargar las texturas
+    }
 
     //-------------------------------------------------------------------------
     // creamos  el "cuerpo" de la serpiente
@@ -53,8 +62,21 @@ int main()
     for (int i = 0; i < 3; i++)
     {
         RectangleShape square(Vector2f(20, 20));
-        square.setPosition(x, 180);
-        x = x - 5;
+        square.setPosition(x - (i * 20), 180);
+
+        if (i == 0)
+        {
+            square.setTexture(&texturaCabeza); // Textura de la cabeza
+        }
+        else if (i == 2)
+        {
+            square.setTexture(&texturaCola); // Textura de la cola
+        }
+        else
+        {
+            square.setTexture(&texturaCuerpo); // Textura del cuerpo
+        }
+
         snake.push_back(square);
     }
 
@@ -198,6 +220,7 @@ int main()
 
             RectangleShape square(Vector2f(20, 20));
             square.setPosition(snake[snake.size() - 1].getPosition());
+            square.setTexture(&texturaCuerpo);
             snake.push_back(square);
             puntos++;
             textoPuntos.setString("Puntos: " + to_string(puntos));
@@ -254,7 +277,7 @@ int main()
         }
         //-------------------------------------------------------------------------
         // que se agregue otro bloque que se mueva
-        if (puntos >= 15 && puntos <= 30)
+        /*if (puntos >= 15 && puntos <= 30)
         {
             cuadrado.move(xCuadrado, yCuadrado);
 
@@ -286,13 +309,13 @@ int main()
                 }
             }
 
-            mostrarCuadrado =  true;
+            mostrarCuadrado = true;
         }
-        if (puntos< 15 || puntos>30)
+        if (puntos < 15 || puntos > 30)
         {
             mostrarCuadrado = false;
-        }
-        
+        }*/
+
         //-------------------------------------------------------------------------
         // que la "manzana" no este donde esta el bloque
         if (forma.getGlobalBounds().intersects(bloque.getGlobalBounds()))
@@ -318,7 +341,6 @@ int main()
         {
             ventana.draw(cuadrado);
         }
-        
 
         for (int i = 0; i < snake.size(); i++)
         {
@@ -355,9 +377,10 @@ bool colisionConBordesRectangulo(const RectangleShape &bloque, const RectangleSh
 
 void moverSnake(Direccion &direccion, vector<RectangleShape> &snake)
 {
-
+    // Guarda la posición actual de la cabeza de la serpiente
     Vector2f cabezaPos = snake[0].getPosition();
 
+    // Mueve la cabeza en la dirección deseada
     switch (direccion)
     {
     case UP:
@@ -374,10 +397,33 @@ void moverSnake(Direccion &direccion, vector<RectangleShape> &snake)
         break;
     }
 
-    for (int i = snake.size() - 1; i > 0; --i)
+    // Mueve cada segmento de la cola a la posición del segmento anterior
+    for(int i = 1; i < snake.size(); ++i)
     {
-        snake[i].setPosition(snake[i - 1].getPosition());
+        // Calcula la nueva posición del segmento actual
+        Vector2f nuevoPos = snake[i].getPosition();
+        Vector2f posicionAnterior = snake[i - 1].getPosition();
+
+        // Calcula el desplazamiento en función de la dirección y la posición
+        float desplazamiento = 15.0f + 20.0f * (i - 1);
+        float offsetX = 0.0f, offsetY = 0.0f;
+
+        // Ajusta el desplazamiento según la dirección
+        if (direccion == UP || direccion == DOWN)
+        {
+            offsetY = desplazamiento * (direccion == UP ? -1.0f : 1.0f);
+        }
+        else if (direccion == LEFT || direccion == RIGHT)
+        {
+            offsetX = desplazamiento * (direccion == LEFT ? -1.0f : 1.0f);
+        }
+
+        // Aplica el desplazamiento a la nueva posición
+        nuevoPos += Vector2f(offsetX, offsetY);
+        snake[i].setPosition(nuevoPos);
     }
+
+    // Actualiza la posición de la cabeza
     snake[0].setPosition(cabezaPos);
 }
 
