@@ -14,14 +14,42 @@ enum Direccion
     RIGHT
 };
 const float MOVIMIENTO = 20.0f;
+Texture texCuerpoHorizontal, texCuerpoVertical;
 
 const float VELOCIDAD = 4.5f;
 const float LADO_CUADRADO = 25.f;
 
+const string PATH = "../recursos/Graphics/";
+#define CANT_TEXT 4
+Texture textCola[CANT_TEXT];
+Texture textDoblar[CANT_TEXT];
+
 Texture texturaCabeza, texturaCuerpo, texturaCola;
+
+// cabeceras de las funciones
+bool colisionConBordesForma(const CircleShape &forma, const RectangleShape &bordeIzquierdo, const RectangleShape &bordeDerecho, const RectangleShape &bordeInferior, const RectangleShape &bordeSuperior);
+
+bool colisionConBordesSnake(const vector<RectangleShape> &snake, const RectangleShape &bordeIzquierdo, const RectangleShape &bordeDerecho, const RectangleShape &bordeInferior, const RectangleShape &bordeSuperior);
+
+bool colisionConBordesRectangulo(const RectangleShape &bloque, const RectangleShape &bordeIzquierdo, const RectangleShape &bordeDerecho, const RectangleShape &bordeInferior, const RectangleShape &bordeSuperior);
+
+void moverSnake(Direccion &direccion, vector<RectangleShape> &snake);
+
+bool colisionConBloque(const RectangleShape &bloque, const RectangleShape &cabeza);
+
+int posCola(Vector2f actual, Vector2f anterior);
+int posCurva(Vector2f anterior, Vector2f actual, Vector2f siguiente);
 
 int main()
 {
+    texCuerpoHorizontal.loadFromFile(PATH + "cuerpoHorizontal.png");
+    texCuerpoVertical.loadFromFile(PATH + "cuerpoVertical.png");
+
+    textCola[0].loadFromFile(PATH + "colaArriba.png");
+    textCola[1].loadFromFile(PATH + "colaDerecha.png");
+    textCola[2].loadFromFile(PATH + "colaAbajo.png");
+    textCola[3].loadFromFile(PATH + "colaIzq.png");
+
     // creamos la ventana
     RenderWindow ventana = RenderWindow({ANCHO_VENT, ALTO_VENT}, "Unidad 1 - Taller de Videojuegos");
     ventana.setFramerateLimit(FRAMERATE);
@@ -35,15 +63,7 @@ int main()
 
     //-------------------------------------------------------------------------
     // cabeceras de las funciones
-    bool colisionConBordesForma(const CircleShape &forma, const RectangleShape &bordeIzquierdo, const RectangleShape &bordeDerecho, const RectangleShape &bordeInferior, const RectangleShape &bordeSuperior);
-
-    bool colisionConBordesSnake(const vector<RectangleShape> &snake, const RectangleShape &bordeIzquierdo, const RectangleShape &bordeDerecho, const RectangleShape &bordeInferior, const RectangleShape &bordeSuperior);
-
-    bool colisionConBordesRectangulo(const RectangleShape &bloque, const RectangleShape &bordeIzquierdo, const RectangleShape &bordeDerecho, const RectangleShape &bordeInferior, const RectangleShape &bordeSuperior);
-
-    void moverSnake(Direccion & direccion, vector<RectangleShape> & snake);
-
-    bool colisionConBloque(const RectangleShape &bloque, const RectangleShape &cabeza);
+    // Mover esta línea al inicio del archivo
 
     //-------------------------------------------------------------------------
     // creamos el bloque
@@ -53,9 +73,9 @@ int main()
     //-------------------------------------------------------------------------
     // cargar textura de la serpiente
 
-    if (!texturaCabeza.loadFromFile("../recursos/cabezaDerecha.png") ||
-        !texturaCuerpo.loadFromFile("../recursos/cuerpoHorizontal.png") ||
-        !texturaCola.loadFromFile("../recursos/colaIzq.png"))
+    if (!texturaCabeza.loadFromFile(PATH + "cabezaDerecha.png") ||
+        !texturaCuerpo.loadFromFile(PATH + "cuerpoHorizontal.png") ||
+        !texturaCola.loadFromFile(PATH + "colaDerecha.png"))
     {
         return -1; // Termina si no se pueden cargar las texturas
     }
@@ -133,6 +153,7 @@ int main()
     Direccion direccion = RIGHT;
     int puntos = 0;
     bool seMovio = true, haMovido = false;
+    bool juego = true;
     bool juegoIniciado = false;
     bool chocoConBorde = false;
     float xCuadrado = 1.0, yCuadrado = 1;
@@ -148,6 +169,13 @@ int main()
     Vector2 diff = {VELOCIDAD, VELOCIDAD};
     //-------------------------------------------------------------------------
     int contFrame;
+    //-------------------------------------------------------------------------
+    Texture texture;
+    !texture.loadFromFile(PATH + "f3.png") && cout << "error en carga de imagen desde disco";
+    // Crea un sprite y le asigna la textura cargada
+    Sprite sprite(texture);
+    sprite.setTextureRect(IntRect(0, 0, ANCHO_VENT, ALTO_VENT));
+
     //-------------------------------------------------------------------------
     // se abre la ventana
     while (ventana.isOpen())
@@ -217,7 +245,7 @@ int main()
             direccion = nuevaDireccion;
         }
 
-        if (haMovido && contFrame % 8 == 0)
+        if (haMovido && contFrame % 4 == 0)
         {
             moverSnake(direccion, snake);
             // haMovido = false; // Resetear la bandera
@@ -234,7 +262,10 @@ int main()
 
             RectangleShape square(Vector2f(20, 20));
             square.setPosition(snake[snake.size() - 1].getPosition());
-            square.setTexture(&texturaCuerpo);
+            int posVecTextCola;
+            posVecTextCola = posCola(snake[snake.size() - 1].getPosition(), snake[snake.size() - 2].getPosition());
+            square.setTexture(&textCola[posVecTextCola]);
+            snake[snake.size() - 1].setTexture(snake[snake.size() - 2].getTexture());
             snake.push_back(square);
             puntos++;
             textoPuntos.setString("Puntos: " + to_string(puntos));
@@ -254,6 +285,7 @@ int main()
             ventana.display();
             continue; // Salir del bucle para evitar dibujar el juego
         }
+
         //-------------------------------------------------------------------------
         // si la snake choca con el bloque
         if (colisionConBloque(bloque, snake[0]))
@@ -261,7 +293,7 @@ int main()
             puntos = 0;
             textoPuntos.setString("Puntos: " + to_string(puntos));
 
-            for (int i = 2; i < snake.size(); i++)
+            for (int i = 3; i < snake.size(); i++)
             {
                 snake.pop_back();
             }
@@ -344,6 +376,7 @@ int main()
         //-------------------------------------------------------------------------
         // dibuja todos los objetos necesarios
         ventana.clear();
+        ventana.draw(sprite);
         ventana.draw(bordeIzquierdo);
         ventana.draw(bordeDerecho);
         ventana.draw(bordeInferior);
@@ -399,108 +432,157 @@ void moverSnake(Direccion &direccion, vector<RectangleShape> &snake)
     {
     case UP:
         cabezaPos.y -= MOVIMIENTO;
-        texturaCabeza.loadFromFile("../recursos/Graphics/head_up.png");
-        texturaCuerpo.loadFromFile("../recursos/Graphics/body_vertical.png");
-        texturaCola.loadFromFile("../recursos/Graphics/tail_down.png");
-
-        for (int i = 0; i < snake.size(); i++)
-        {
-            if (i == 0)
-            {
-                snake[i].setTexture(&texturaCabeza);
-            }
-            else if (i == snake.size() - 1)
-            {
-                snake[i].setTexture(&texturaCola);
-            }
-            else
-            {
-                snake[i].setTexture(&texturaCuerpo);
-            }
-        }
+        texturaCabeza.loadFromFile(PATH + "cabezaArriba.png");
+        snake[0].setTexture(&texturaCabeza);
 
         break;
     case DOWN:
         cabezaPos.y += MOVIMIENTO;
+        texturaCabeza.loadFromFile(PATH + "cabezaAbajo.png");
+        snake[0].setTexture(&texturaCabeza);
 
-        texturaCola.loadFromFile("../recursos/Graphics/cola.png");
-        texturaCuerpo.loadFromFile("../recursos/Graphics/body_vertical.png");
-        texturaCabeza.loadFromFile("../recursos/Graphics/head_down.png");
-
-        for (int i = 0; i < snake.size(); i++)
-        {
-            if (i == 0)
-            {
-                snake[i].setTexture(&texturaCabeza);
-            }
-            else if (i == snake.size() - 1)
-            {
-                snake[i].setTexture(&texturaCola);
-            }
-            else
-            {
-                snake[i].setTexture(&texturaCuerpo);
-            }
-        }
         break;
     case LEFT:
         cabezaPos.x -= MOVIMIENTO;
-        texturaCola.loadFromFile("../recursos/Graphics/tail_right.png");
-        texturaCuerpo.loadFromFile("../recursos/cuerpoHorizontal.png");
-        texturaCabeza.loadFromFile("../recursos/Graphics/head_left.png");
+        texturaCabeza.loadFromFile(PATH + "cabezaIzq.png");
+        snake[0].setTexture(&texturaCabeza);
 
-        for (int i = 0; i < snake.size(); i++)
-        {
-            if (i == 0)
-            {
-                snake[i].setTexture(&texturaCabeza);
-            }
-            else if (i == snake.size() - 1)
-            {
-                snake[i].setTexture(&texturaCola);
-            }
-            else
-            {
-                snake[i].setTexture(&texturaCuerpo);
-            }
-        }
         break;
     case RIGHT:
         cabezaPos.x += MOVIMIENTO;
+        texturaCabeza.loadFromFile(PATH + "cabezaDerecha.png");
+        snake[0].setTexture(&texturaCabeza);
 
-        texturaCola.loadFromFile("../recursos/colaIzq.png");
-        texturaCuerpo.loadFromFile("../recursos/cuerpoHorizontal.png");
-        texturaCabeza.loadFromFile("../recursos/cabezaDerecha.png");
-
-        for (int i = 0; i < snake.size(); i++)
-        {
-            if (i == 0)
-            {
-                snake[i].setTexture(&texturaCabeza);
-            }
-            else if (i == snake.size() - 1)
-            {
-                snake[i].setTexture(&texturaCola);
-            }
-            else
-            {
-                snake[i].setTexture(&texturaCuerpo);
-            }
-        }
         break;
     }
 
-    // Mueve cada segmento de la cola a la posición del segmento anterior
+    textDoblar[0].loadFromFile(PATH + "cuerpo_upRight.png");
+    textDoblar[1].loadFromFile(PATH + "cuerpo_upLeft.png");
+    textDoblar[2].loadFromFile(PATH + "cuerpo_downRight.png");
+    textDoblar[3].loadFromFile(PATH + "cuerpo_downLeft.png");
+
     for (int i = snake.size() - 1; i > 0; --i)
     {
-        snake[i].setPosition(snake[i - 1].getPosition());
+
+        Vector2f posAnterior = snake[i - 1].getPosition();
+        if ((posAnterior.x != snake[i].getPosition().x))
+        {
+            snake[i].setTexture(&texCuerpoHorizontal);
+        }
+        else if ((posAnterior.y != snake[i].getPosition().y))
+        {
+            snake[i].setTexture(&texCuerpoVertical);
+        }
+
+        snake[i].setPosition(posAnterior);
     }
 
-    // Actualiza la posición de la cabeza
+    for (int i = snake.size() - 2; i > 0; --i)
+    {
+
+        Vector2f posAnterior = snake[i + 1].getPosition();
+        Vector2f posActual = snake[i].getPosition();
+        Vector2f posSiguiente = snake[i - 1].getPosition();
+        if (posAnterior.x != posSiguiente.x && posAnterior.y != posSiguiente.y)
+        {
+            int curvaPos = posCurva(posAnterior, posActual, posSiguiente);
+            if (curvaPos != -1)
+            {
+                snake[i].setTexture(&textDoblar[curvaPos]);
+            }
+        }
+    }
+
+    int posVecTextCola;
+    posVecTextCola = posCola(snake[snake.size() - 1].getPosition(), snake[snake.size() - 2].getPosition());
+    snake[snake.size() - 1].setTexture(&textCola[posVecTextCola]);
+
     snake[0].setPosition(cabezaPos);
 }
 
 bool colisionConBloque(const RectangleShape &bloque, const RectangleShape &cabeza)
 {
     return cabeza.getGlobalBounds().intersects(bloque.getGlobalBounds());
+}
+
+int posCola(Vector2f actual, Vector2f anterior)
+{
+    int pos = -1;
+    if (actual.x < anterior.x)
+    {
+        pos = 1;
+    }
+    else if (actual.x > anterior.x)
+    {
+        pos = 3;
+    }
+    else if (actual.y > anterior.y)
+    {
+        pos = 0;
+    }
+    else if (actual.y < anterior.y)
+    {
+        pos = 2;
+    }
+
+    return pos;
+}
+
+int posCurva(Vector2f anterior, Vector2f actual, Vector2f siguiente)
+{
+    int pos = -1;
+    if (anterior.x < actual.x)
+    { // derecha
+        if (actual.y < siguiente.y)
+        {
+            // derecha abajo
+            pos = 1;
+        }
+        else
+        {
+            // derecha arriba
+            pos = 3;
+        }
+    }
+    else if (anterior.x > actual.x) // iqz
+    {
+        if (actual.y < siguiente.y)
+        {
+            // izq abajo
+            pos = 0;
+        }
+        else
+        {
+            // izq arriba
+            pos = 2;
+        }
+    }
+    else if (anterior.y < actual.y)
+    { // abajo
+        if (actual.x < siguiente.x)
+        {
+            // abajo derecha
+            pos = 2;
+        }
+        else
+        {
+            // abajo izquierda
+            pos = 3;
+        }
+    }
+    else if (anterior.y > actual.y)
+    {
+        if (actual.x < siguiente.x)
+        {
+            // arriba derecha
+            pos = 0;
+        }
+        else
+        {
+            // arriba izquierda
+            pos = 1;
+        }
+    }
+
+    return pos;
 }
