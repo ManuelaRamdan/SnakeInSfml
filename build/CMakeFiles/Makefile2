@@ -215,8 +215,8 @@ _deps/sfml-build/src/SFML/Window/clean: _deps/sfml-build/src/SFML/Window/CMakeFi
 
 # All Build rule for target.
 CMakeFiles/UTN_INSPT_SFMLProject.dir/all: _deps/sfml-build/src/SFML/System/CMakeFiles/sfml-system.dir/all
-CMakeFiles/UTN_INSPT_SFMLProject.dir/all: _deps/sfml-build/src/SFML/Window/CMakeFiles/sfml-window.dir/all
 CMakeFiles/UTN_INSPT_SFMLProject.dir/all: _deps/sfml-build/src/SFML/Graphics/CMakeFiles/sfml-graphics.dir/all
+CMakeFiles/UTN_INSPT_SFMLProject.dir/all: _deps/sfml-build/src/SFML/Window/CMakeFiles/sfml-window.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\UTN_INSPT_SFMLProject.dir\build.make CMakeFiles/UTN_INSPT_SFMLProject.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\UTN_INSPT_SFMLProject.dir\build.make CMakeFiles/UTN_INSPT_SFMLProject.dir/build
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="C:\taller\otro git\sfml-template\build\CMakeFiles" --progress-num=1 "Built target UTN_INSPT_SFMLProject"

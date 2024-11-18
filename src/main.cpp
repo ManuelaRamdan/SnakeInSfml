@@ -67,9 +67,11 @@ int main()
 
     //-------------------------------------------------------------------------
     // creamos el bloque
-    RectangleShape bloque(Vector2f(80, 20));
+    Texture bloqueText;
+    bloqueText.loadFromFile("../recursos/Graphics/arbustro.png");
+    RectangleShape bloque(Vector2f(100, 100));
     bloque.setPosition(100, 100);
-    bloque.setFillColor(Color::Magenta);
+    bloque.setTexture(&bloqueText);
     //-------------------------------------------------------------------------
     // cargar textura de la serpiente
 
@@ -108,19 +110,19 @@ int main()
     //-------------------------------------------------------------------------
     // creamos los bordes
     RectangleShape bordeIzquierdo(Vector2f(20, ALTO_VENT));
-    bordeIzquierdo.setFillColor(Color::Red);
+    bordeIzquierdo.setFillColor(Color::Cyan);
     bordeIzquierdo.setPosition(0, 0);
 
     RectangleShape bordeDerecho(Vector2f(20, ALTO_VENT));
-    bordeDerecho.setFillColor(Color::Green);
+    bordeDerecho.setFillColor(Color::Blue);
     bordeDerecho.setPosition(ANCHO_VENT - 20, 0);
 
     RectangleShape bordeInferior(Vector2f(ANCHO_VENT, 20));
-    bordeInferior.setFillColor(Color::Green);
+    bordeInferior.setFillColor(Color::Blue);
     bordeInferior.setPosition(0, ALTO_VENT - 20);
 
     RectangleShape bordeSuperior(Vector2f(ANCHO_VENT, 20)); // Cambia el tamaño del borde superior
-    bordeSuperior.setFillColor(Color::Red);                 // Asegúrate de usar bordeSuperior aquí
+    bordeSuperior.setFillColor(Color::Blue);                 // Asegúrate de usar bordeSuperior aquí
     bordeSuperior.setPosition(0, 0);                        // Posición en la parte superior
 
     //-------------------------------------------------------------------------
@@ -175,6 +177,9 @@ int main()
     // Crea un sprite y le asigna la textura cargada
     Sprite sprite(texture);
     sprite.setTextureRect(IntRect(0, 0, ANCHO_VENT, ALTO_VENT));
+
+    //-------------------------------------------------------------------------
+    int cantFrame =10;
 
     //-------------------------------------------------------------------------
     // se abre la ventana
@@ -245,11 +250,18 @@ int main()
             direccion = nuevaDireccion;
         }
 
-        if (haMovido && contFrame % 4 == 0)
+
+        if (haMovido && contFrame % cantFrame == 0)
         {
             moverSnake(direccion, snake);
             // haMovido = false; // Resetear la bandera
         }
+
+        if (cantFrame>2 && cantFrame< 10 && ((puntos == 20 ) || (puntos == 40)))
+        {
+            cantFrame-=2;
+        }
+        
         //-------------------------------------------------------------------------
         // movimiento aleatorio de la "manzana"
         if (snake[0].getGlobalBounds().intersects(forma.getGlobalBounds()))
