@@ -41,6 +41,7 @@ int posCola(Vector2f actual, Vector2f anterior);
 int posCurva(Vector2f anterior, Vector2f actual, Vector2f siguiente);
 
 bool colisionConCuerpoSnake(vector<RectangleShape> &snake);
+void cargarTextura(Direccion &direccion, vector<RectangleShape> &snake);
 
 int main()
 {
@@ -308,13 +309,14 @@ int main()
             nuevaDireccion = UP;
             haMovido = true;
         }
+        cargarTextura(nuevaDireccion, snake);
 
         if (nuevaDireccion != direccion)
         {
             direccion = nuevaDireccion;
         }
 
-        if (haMovido && contFrame % 4 == 0)
+        if (haMovido && contFrame % 6 == 0)
         {
             moverSnake(direccion, snake);
             // haMovido = false; // Resetear la bandera
@@ -350,10 +352,6 @@ int main()
 
         if (chocoConBorde)
         {
-            /*             ventana.clear();
-                        ventana.draw(sprite);
-                        ventana.draw(textoPerdiste); // Dibuja el mensaje de pérdida
-                        ventana.display(); */
             juego = false;
             juegoIniciado = false;
         }
@@ -504,72 +502,73 @@ void moverSnake(Direccion &direccion, vector<RectangleShape> &snake)
     {
     case UP:
         cabezaPos.y -= MOVIMIENTO;
-        texturaCabeza.loadFromFile(PATH + "cabezaArriba.png");
-        snake[0].setTexture(&texturaCabeza);
+        /*         texturaCabeza.loadFromFile(PATH + "cabezaArriba.png");
+                snake[0].setTexture(&texturaCabeza); */
 
         break;
     case DOWN:
         cabezaPos.y += MOVIMIENTO;
-        texturaCabeza.loadFromFile(PATH + "cabezaAbajo.png");
-        snake[0].setTexture(&texturaCabeza);
+        /*         texturaCabeza.loadFromFile(PATH + "cabezaAbajo.png");
+                snake[0].setTexture(&texturaCabeza); */
 
         break;
     case LEFT:
         cabezaPos.x -= MOVIMIENTO;
-        texturaCabeza.loadFromFile(PATH + "cabezaIzq.png");
-        snake[0].setTexture(&texturaCabeza);
+        /*         texturaCabeza.loadFromFile(PATH + "cabezaIzq.png");
+                snake[0].setTexture(&texturaCabeza); */
 
         break;
     case RIGHT:
         cabezaPos.x += MOVIMIENTO;
-        texturaCabeza.loadFromFile(PATH + "cabezaDerecha.png");
-        snake[0].setTexture(&texturaCabeza);
+        /*         texturaCabeza.loadFromFile(PATH + "cabezaDerecha.png");
+                snake[0].setTexture(&texturaCabeza); */
 
         break;
     }
 
-    textDoblar[0].loadFromFile(PATH + "cuerpo_upRight.png");
-    textDoblar[1].loadFromFile(PATH + "cuerpo_upLeft.png");
-    textDoblar[2].loadFromFile(PATH + "cuerpo_downRight.png");
-    textDoblar[3].loadFromFile(PATH + "cuerpo_downLeft.png");
+    /*     textDoblar[0].loadFromFile(PATH + "cuerpo_upRight.png");
+        textDoblar[1].loadFromFile(PATH + "cuerpo_upLeft.png");
+        textDoblar[2].loadFromFile(PATH + "cuerpo_downRight.png");
+        textDoblar[3].loadFromFile(PATH + "cuerpo_downLeft.png"); */
 
     for (int i = snake.size() - 1; i > 0; --i)
     {
 
         Vector2f posAnterior = snake[i - 1].getPosition();
-        if ((posAnterior.x != snake[i].getPosition().x))
+/*         if ((posAnterior.x != snake[i].getPosition().x))
         {
             snake[i].setTexture(&texCuerpoHorizontal);
         }
         else if ((posAnterior.y != snake[i].getPosition().y))
         {
             snake[i].setTexture(&texCuerpoVertical);
-        }
+        } */
 
         snake[i].setPosition(posAnterior);
     }
 
-    for (int i = snake.size() - 2; i > 0; --i)
-    {
-
-        Vector2f posAnterior = snake[i + 1].getPosition();
-        Vector2f posActual = snake[i].getPosition();
-        Vector2f posSiguiente = snake[i - 1].getPosition();
-        if (posAnterior.x != posSiguiente.x && posAnterior.y != posSiguiente.y)
+    /*     for (int i = snake.size() - 2; i > 0; --i)
         {
-            int curvaPos = posCurva(posAnterior, posActual, posSiguiente);
-            if (curvaPos != -1)
+
+            Vector2f posAnterior = snake[i + 1].getPosition();
+            Vector2f posActual = snake[i].getPosition();
+            Vector2f posSiguiente = snake[i - 1].getPosition();
+            if (posAnterior.x != posSiguiente.x && posAnterior.y != posSiguiente.y)
             {
-                snake[i].setTexture(&textDoblar[curvaPos]);
+                int curvaPos = posCurva(posAnterior, posActual, posSiguiente);
+                if (curvaPos != -1)
+                {
+                    snake[i].setTexture(&textDoblar[curvaPos]);
+                }
             }
         }
-    }
 
-    int posVecTextCola;
-    posVecTextCola = posCola(snake[snake.size() - 1].getPosition(), snake[snake.size() - 2].getPosition());
-    snake[snake.size() - 1].setTexture(&textCola[posVecTextCola]);
-
+        int posVecTextCola;
+        posVecTextCola = posCola(snake[snake.size() - 1].getPosition(), snake[snake.size() - 2].getPosition());
+        snake[snake.size() - 1].setTexture(&textCola[posVecTextCola]); */
+        
     snake[0].setPosition(cabezaPos);
+    cargarTextura(direccion, snake);
 }
 
 bool colisionConBloque(const RectangleShape &bloque, const RectangleShape &cabeza)
@@ -670,4 +669,71 @@ bool colisionConCuerpoSnake(vector<RectangleShape> &snake)
         }
     }
     return choco;
+}
+
+void cargarTextura(Direccion &direccion, vector<RectangleShape> &snake)
+{
+    switch (direccion)
+    {
+    case UP:
+
+        texturaCabeza.loadFromFile(PATH + "cabezaArriba.png");
+        snake[0].setTexture(&texturaCabeza);
+
+        break;
+    case DOWN:
+        texturaCabeza.loadFromFile(PATH + "cabezaAbajo.png");
+        snake[0].setTexture(&texturaCabeza);
+
+        break;
+    case LEFT:
+        texturaCabeza.loadFromFile(PATH + "cabezaIzq.png");
+        snake[0].setTexture(&texturaCabeza);
+
+        break;
+    case RIGHT:
+        texturaCabeza.loadFromFile(PATH + "cabezaDerecha.png");
+        snake[0].setTexture(&texturaCabeza);
+
+        break;
+    }
+
+    textDoblar[0].loadFromFile(PATH + "cuerpo_upRight.png");
+    textDoblar[1].loadFromFile(PATH + "cuerpo_upLeft.png");
+    textDoblar[2].loadFromFile(PATH + "cuerpo_downRight.png");
+    textDoblar[3].loadFromFile(PATH + "cuerpo_downLeft.png");
+
+    for (int i = snake.size() - 1; i > 0; --i)
+    {
+
+        Vector2f posAnterior = snake[i - 1].getPosition();
+        if ((posAnterior.x != snake[i].getPosition().x))
+        {
+            snake[i].setTexture(&texCuerpoHorizontal);
+        }
+        else if ((posAnterior.y != snake[i].getPosition().y))
+        {
+            snake[i].setTexture(&texCuerpoVertical);
+        }
+    }
+
+    for (int i = snake.size() - 2; i > 0; --i)
+    {
+
+        Vector2f posAnterior = snake[i + 1].getPosition();
+        Vector2f posActual = snake[i].getPosition();
+        Vector2f posSiguiente = snake[i - 1].getPosition();
+        if (posAnterior.x != posSiguiente.x && posAnterior.y != posSiguiente.y)
+        {
+            int curvaPos = posCurva(posAnterior, posActual, posSiguiente);
+            if (curvaPos != -1)
+            {
+                snake[i].setTexture(&textDoblar[curvaPos]);
+            }
+        }
+    }
+
+    int posVecTextCola;
+    posVecTextCola = posCola(snake[snake.size() - 1].getPosition(), snake[snake.size() - 2].getPosition());
+    snake[snake.size() - 1].setTexture(&textCola[posVecTextCola]);
 }
