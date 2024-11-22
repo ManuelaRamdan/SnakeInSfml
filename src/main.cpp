@@ -40,8 +40,11 @@ bool colisionConBloque(const RectangleShape &bloque, const RectangleShape &cabez
 int posCola(Vector2f actual, Vector2f anterior);
 int posCurva(Vector2f anterior, Vector2f actual, Vector2f siguiente);
 
+bool colisionConCuerpoSnake(vector<RectangleShape> &snake);
+
 int main()
 {
+
     texCuerpoHorizontal.loadFromFile(PATH + "cuerpoHorizontal.png");
     texCuerpoVertical.loadFromFile(PATH + "cuerpoVertical.png");
 
@@ -109,21 +112,22 @@ int main()
 
     //-------------------------------------------------------------------------
     // creamos los bordes
+    Color colorBorde(14, 129, 14);
     RectangleShape bordeIzquierdo(Vector2f(20, ALTO_VENT));
-    bordeIzquierdo.setFillColor(Color::Cyan);
+    bordeIzquierdo.setFillColor(colorBorde);
     bordeIzquierdo.setPosition(0, 0);
 
     RectangleShape bordeDerecho(Vector2f(20, ALTO_VENT));
-    bordeDerecho.setFillColor(Color::Blue);
+    bordeDerecho.setFillColor(colorBorde);
     bordeDerecho.setPosition(ANCHO_VENT - 20, 0);
 
     RectangleShape bordeInferior(Vector2f(ANCHO_VENT, 20));
-    bordeInferior.setFillColor(Color::Blue);
+    bordeInferior.setFillColor(colorBorde);
     bordeInferior.setPosition(0, ALTO_VENT - 20);
 
-    RectangleShape bordeSuperior(Vector2f(ANCHO_VENT, 20)); // Cambia el tamaño del borde superior
-    bordeSuperior.setFillColor(Color::Blue);                 // Asegúrate de usar bordeSuperior aquí
-    bordeSuperior.setPosition(0, 0);                        // Posición en la parte superior
+    RectangleShape bordeSuperior(Vector2f(ANCHO_VENT, 20));
+    bordeSuperior.setFillColor(colorBorde);
+    bordeSuperior.setPosition(0, 0);
 
     //-------------------------------------------------------------------------
     // mostrar los puntos
@@ -140,16 +144,16 @@ int main()
     Text textoInicio;
     textoInicio.setFont(fuente);
     textoInicio.setCharacterSize(30);
-    textoInicio.setFillColor(Color::White);
+    textoInicio.setFillColor(Color::Black);
     textoInicio.setString("Bienvenido a Snake!\nPresiona ESPACIO para jugar.");
-    textoInicio.setPosition((ANCHO_VENT - textoInicio.getLocalBounds().width) / 2, ALTO_VENT / 2 - 50);
+    textoInicio.setPosition((ANCHO_VENT - textoInicio.getLocalBounds().width) / 2, (ALTO_VENT - textoInicio.getLocalBounds().height) / 2);
 
     Text textoPerdiste;
     textoPerdiste.setFont(fuente);
     textoPerdiste.setCharacterSize(30);
     textoPerdiste.setFillColor(Color::Red);
-    textoPerdiste.setString("Perdiste!\n");
-    textoInicio.setPosition((ANCHO_VENT - textoPerdiste.getLocalBounds().width) / 2, ALTO_VENT / 2 - 50);
+    textoPerdiste.setString("Perdiste!\nPresiona ESPACIO para reiniciar.");
+    textoPerdiste.setPosition((ANCHO_VENT - textoPerdiste.getLocalBounds().width) / 2, (ALTO_VENT - textoPerdiste.getLocalBounds().height) / 2);
     //-------------------------------------------------------------------------
     // declaramos las variables
     Direccion direccion = RIGHT;
@@ -179,7 +183,7 @@ int main()
     sprite.setTextureRect(IntRect(0, 0, ANCHO_VENT, ALTO_VENT));
 
     //-------------------------------------------------------------------------
-    int cantFrame =10;
+    int cantFrame = 8;
 
     //-------------------------------------------------------------------------
     // se abre la ventana
@@ -204,18 +208,78 @@ int main()
             }
         }
         //-------------------------------------------------------------------------
+
+        while (!juego)
+        {
+            Event evento = Event();
+            while (ventana.pollEvent(evento))
+            {
+                if (evento.type == Event::Closed)
+                {
+                    // Si el usuario toc´o la [X] para cerra la ventana:
+                    ventana.close();
+                }
+            }
+
+            if (Keyboard::isKeyPressed(Keyboard::Space))
+            {
+                ventana.clear();
+                juegoIniciado = true;
+                puntos = 0;
+                juego = true;
+                chocoConBorde = false;
+                direccion = RIGHT;
+
+                for (int i = snake.size(); i > 3; i--)
+                {
+                    snake.pop_back();
+                }
+
+                x = (ANCHO_VENT / 2);
+
+                for (int i = 0; i < 3; i++)
+                {
+
+                    snake[i].setPosition(x - (i * 20), 180);
+
+                    if (i == 0)
+                    {
+                        snake[i].setTexture(&texturaCabeza); // Textura de la cabeza
+                    }
+                    else if (i == 2)
+                    {
+                        snake[i].setTexture(&texturaCola); // Textura de la cola
+                    }
+                    else
+                    {
+                        snake[i].setTexture(&texturaCuerpo); // Textura del cuerpo
+                    }
+                }
+            }
+            ventana.clear();
+            ventana.draw(sprite);
+            ventana.draw(textoPerdiste);
+            ventana.display();
+            // continue;
+        }
         // cuando el juego empieza, muestre la pantalla de inicio
         if (!juegoIniciado)
         {
             ventana.clear();
-            ventana.draw(textoInicio);
+            ventana.draw(sprite);
+            if (juego)
+            {
+                ventana.draw(textoInicio);
+            }
+
             ventana.display();
 
             if (Keyboard::isKeyPressed(Keyboard::Space))
             {
                 juegoIniciado = true;
                 puntos = 0;
-                // Reiniciar variables del juego si es necesario
+                juego = true;
+                chocoConBorde = false;
             }
             continue;
         }
@@ -250,18 +314,12 @@ int main()
             direccion = nuevaDireccion;
         }
 
-
-        if (haMovido && contFrame % cantFrame == 0)
+        if (haMovido && contFrame % 4 == 0)
         {
             moverSnake(direccion, snake);
             // haMovido = false; // Resetear la bandera
         }
 
-        if (cantFrame>2 && cantFrame< 10 && ((puntos == 20 ) || (puntos == 40)))
-        {
-            cantFrame-=2;
-        }
-        
         //-------------------------------------------------------------------------
         // movimiento aleatorio de la "manzana"
         if (snake[0].getGlobalBounds().intersects(forma.getGlobalBounds()))
@@ -284,7 +342,7 @@ int main()
         }
         //-------------------------------------------------------------------------
         // que pasa si el snake choca con el borde
-        if (colisionConBordesSnake(snake, bordeIzquierdo, bordeDerecho, bordeInferior, bordeSuperior))
+        if (colisionConBordesSnake(snake, bordeIzquierdo, bordeDerecho, bordeInferior, bordeSuperior) || colisionConCuerpoSnake(snake))
         {
             chocoConBorde = true;
             puntos = 0;
@@ -292,10 +350,12 @@ int main()
 
         if (chocoConBorde)
         {
-            ventana.clear();
-            ventana.draw(textoPerdiste); // Dibuja el mensaje de pérdida
-            ventana.display();
-            continue; // Salir del bucle para evitar dibujar el juego
+            /*             ventana.clear();
+                        ventana.draw(sprite);
+                        ventana.draw(textoPerdiste); // Dibuja el mensaje de pérdida
+                        ventana.display(); */
+            juego = false;
+            juegoIniciado = false;
         }
 
         //-------------------------------------------------------------------------
@@ -335,7 +395,7 @@ int main()
         }
         //-------------------------------------------------------------------------
         // que se agregue otro bloque que se mueva
-        /*if (puntos >= 15 && puntos <= 30)
+        if (puntos >= 15 && puntos <= 30)
         {
             cuadrado.move(xCuadrado, yCuadrado);
 
@@ -372,7 +432,7 @@ int main()
         if (puntos < 15 || puntos > 30)
         {
             mostrarCuadrado = false;
-        }*/
+        }
 
         //-------------------------------------------------------------------------
         // que la "manzana" no este donde esta el bloque
@@ -597,4 +657,17 @@ int posCurva(Vector2f anterior, Vector2f actual, Vector2f siguiente)
     }
 
     return pos;
+}
+
+bool colisionConCuerpoSnake(vector<RectangleShape> &snake)
+{
+    bool choco = false;
+    for (size_t i = 1; i < snake.size(); ++i)
+    {
+        if (snake[0].getGlobalBounds().intersects(snake[i].getGlobalBounds()))
+        {
+            choco = true;
+        }
+    }
+    return choco;
 }
