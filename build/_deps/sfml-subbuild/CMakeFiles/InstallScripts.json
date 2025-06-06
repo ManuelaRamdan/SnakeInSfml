@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"C:/taller/otro git/build/_deps/sfml-subbuild/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

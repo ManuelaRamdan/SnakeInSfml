@@ -1,0 +1,1 @@
+-I"C:/taller/OTROGI~1/build/_deps/sfml-src/include" -I"C:/taller/OTROGI~1/build/_deps/sfml-src/src" -isystem "C:/taller/OTROGI~1/build/_deps/sfml-src/extlibs/headers/STB_IM~1" -isystem "C:/taller/OTROGI~1/build/_deps/sfml-src/extlibs/headers/glad/include" -isystem "C:/taller/OTROGI~1/build/_deps/sfml-src/extlibs/headers/FREETY~1"
